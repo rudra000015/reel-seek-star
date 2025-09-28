@@ -8,9 +8,8 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<'search' | 'favorites'>('search');
   const { favoritesCount } = useFavorites();
   
-  // For now, we'll show a warning about the API key
-  // Users can add their API key when they connect to Supabase or Cloud
-  const apiKey = undefined; // Will be set when they add their API key
+  // OMDb API key for movie search
+  const apiKey = '435bc363';
 
   return (
     <div className="min-h-screen bg-background">
