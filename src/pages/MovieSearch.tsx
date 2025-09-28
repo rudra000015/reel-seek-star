@@ -6,6 +6,8 @@ import { SearchBar } from '@/components/SearchBar';
 import { MovieCard } from '@/components/MovieCard';
 import { MovieDetails } from '@/components/MovieDetails';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { DomeGallery } from '@/components/DomeGallery';
+import { GenreFilter } from '@/components/GenreFilter';
 import { useMovies } from '@/hooks/useMovies';
 import { useFavorites } from '@/hooks/useFavorites';
 import type { Movie } from '@/components/MovieCard';
@@ -19,6 +21,7 @@ export const MovieSearch = ({ apiKey }: MovieSearchProps) => {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [movieDetails, setMovieDetails] = useState<Movie | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
   const { 
     movies, 
@@ -37,12 +40,17 @@ export const MovieSearch = ({ apiKey }: MovieSearchProps) => {
 
   const handleSearch = useCallback(async () => {
     if (searchQuery.trim()) {
-      await searchMovies(searchQuery.trim());
+      // Add genre filter to search query
+      const genreQuery = selectedGenres.length > 0 
+        ? `${searchQuery.trim()} ${selectedGenres.join(' ')}`
+        : searchQuery.trim();
+      await searchMovies(genreQuery);
     }
-  }, [searchQuery, searchMovies]);
+  }, [searchQuery, selectedGenres, searchMovies]);
 
   const handleClear = () => {
     setSearchQuery('');
+    setSelectedGenres([]);
     reset();
   };
 
@@ -109,7 +117,7 @@ export const MovieSearch = ({ apiKey }: MovieSearchProps) => {
             </p>
           </div>
 
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto space-y-4">
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
@@ -118,8 +126,35 @@ export const MovieSearch = ({ apiKey }: MovieSearchProps) => {
               isLoading={loading}
               placeholder="Search for movies, TV shows..."
             />
+            
+            <div className="flex justify-center">
+              <GenreFilter
+                selectedGenres={selectedGenres}
+                onGenreChange={setSelectedGenres}
+              />
+            </div>
           </div>
         </div>
+
+        {/* Dome Gallery - Only show when there are movies */}
+        {hasResults && !loading && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Explore Movies
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Interactive 3D gallery of your search results
+              </p>
+            </div>
+            <DomeGallery 
+              movies={movies}
+              onMovieClick={handleMovieDetails}
+              className="mb-8"
+              grayscale={true}
+            />
+          </div>
+        )}
 
         {/* Error Display */}
         {error && (
